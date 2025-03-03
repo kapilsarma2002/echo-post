@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  clerkId      String        @unique
+  email        String        @unique
+  name         String?
+  avatarUrl    String?
+  accounts     Account[]
+  posts        Post[]
+  Subscription Subscription?
+
+  @@index([email])
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          Platform
+  providerAccountId String   @unique
+  accessToken       String? // Token for posting (expires)
+  refreshToken      String? // For renewing access
+  expiresAt         Int?
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id          String     @id @default(cuid())
+  userId      String
+  platform    Platform
+  text        String?
+  imageUrl    String?
+  scheduledAt DateTime
+  status      PostStatus @default(SCHEDULED)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id        String             @id @default(cuid())
+  userId    String             @unique
+  plan      Plan
+  stripeId  String? // Stripe subscription ID
+  status    SubscriptionStatus @default(ACTIVE)
+  expiresAt DateTime?
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Platform {
+  TWITTER
+  INSTAGRAM
+  LINKEDIN
+  FACEBOOK
+}
+
+enum PostStatus {
+  SCHEDULED
+  POSTED
+  FAILED
+}
+
+enum Plan {
+  FREE
+  PRO
+  AGENCY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+}
