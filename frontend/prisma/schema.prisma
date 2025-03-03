@@ -17,7 +17,8 @@ model User {
   avatarUrl    String?
   accounts     Account[]
   posts        Post[]
-  Subscription Subscription?
+  subscription Subscription?
+  usage        Usage?
 
   @@index([email])
 }
@@ -30,6 +31,7 @@ model Account {
   accessToken       String? // Token for posting (expires)
   refreshToken      String? // For renewing access
   expiresAt         Int?
+
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -41,6 +43,7 @@ model Post {
   imageUrl    String?
   scheduledAt DateTime
   status      PostStatus @default(SCHEDULED)
+
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -51,7 +54,19 @@ model Subscription {
   stripeId  String? // Stripe subscription ID
   status    SubscriptionStatus @default(ACTIVE)
   expiresAt DateTime?
+
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Usage {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  postCount   Int      @default(0)
+  apiCalls    Int      @default(0)
+  accountCount Int     @default(0)
+  resetAt     DateTime // When the limits reset (monthly)
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum Platform {
