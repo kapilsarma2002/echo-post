@@ -19,6 +19,7 @@ model User {
   posts        Post[]
   subscription Subscription?
   usage        Usage?
+  settings     Settings?
 
   @@index([email])
 }
@@ -26,11 +27,13 @@ model User {
 model Account {
   id                String   @id @default(cuid())
   userId            String
-  provider          Platform
+  platform          Platform
   providerAccountId String   @unique
   accessToken       String? // Token for posting (expires)
   refreshToken      String? // For renewing access
   expiresAt         Int?
+  accountName       String?
+  isActive          Boolean  @default(true)
 
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -38,13 +41,27 @@ model Account {
 model Post {
   id          String     @id @default(cuid())
   userId      String
+  title       String
+  content     String?
   platform    Platform
-  text        String?
   imageUrl    String?
   scheduledAt DateTime
-  status      PostStatus @default(SCHEDULED)
+  status      PostStatus @default(DRAFT)
 
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Settings {
+  id                   String  @id @default(cuid())
+  userId               String  @unique
+  darkMode             Boolean @default(false)
+  emailNotifications   Boolean @default(true)
+  pushNotifications    Boolean @default(true)
+  defaultPlatform      Platform?
+  autoPostToConnected  Boolean @default(false)
+  language             String  @default("en")
+
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Subscription {
@@ -59,14 +76,34 @@ model Subscription {
 }
 
 model Usage {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  postCount   Int      @default(0)
-  apiCalls    Int      @default(0)
-  accountCount Int     @default(0)
-  resetAt     DateTime // When the limits reset (monthly)
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  postCount    Int      @default(0)
+  apiCalls     Int      @default(0)
+  accountCount Int      @default(0)
+  resetAt      DateTime // When the limits reset (monthly)
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Analytics {
+  id            String   @id @default(cuid())
+  postId        String
+  impressions   Int      @default(0)
+  engagements   Int      @default(0)
+  clicks        Int      @default(0)
+  shares        Int      @default(0)
+  recordedAt    DateTime @default(now())
+}
+
+model Notification {
+  id          String             @id @default(cuid())
+  userId      String
+  message     String
+  type        NotificationType
+  read        Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  link        String?
 }
 
 enum Platform {
@@ -77,8 +114,9 @@ enum Platform {
 }
 
 enum PostStatus {
+  DRAFT
   SCHEDULED
-  POSTED
+  PUBLISHED
   FAILED
 }
 
@@ -91,4 +129,12 @@ enum Plan {
 enum SubscriptionStatus {
   ACTIVE
   CANCELLED
+}
+
+enum NotificationType {
+  SYSTEM
+  POST_PUBLISHED
+  POST_FAILED
+  ACCOUNT_CONNECTED
+  SUBSCRIPTION
 }
