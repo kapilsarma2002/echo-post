@@ -1,15 +1,16 @@
 
 import { useState } from 'react';
-import { Post, initialPosts } from '@/types/post';
+import { Post, initialPosts, posts } from '@/types/post';
 import { toast } from 'sonner';
 
 export const usePosts = () => {
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [homePosts, setHomePosts] = useState<Post[]>(initialPosts);
+  const [allPosts, setAllPosts] = useState<Post[]>(posts);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const createPost = (newPost: Post) => {
-    setPosts(prev => [
+    setAllPosts(prev => [
       {
         ...newPost,
         id: prev.length > 0 ? Math.max(...prev.map(p => p.id)) + 1 : 1
@@ -19,13 +20,13 @@ export const usePosts = () => {
   };
 
   const updatePost = (updatedPost: Post) => {
-    setPosts(prev => prev.map(post => 
+    setAllPosts(prev => prev.map(post => 
       post.id === updatedPost.id ? updatedPost : post
     ));
   };
 
   const deletePost = (postId: number) => {
-    setPosts(prev => prev.filter(post => post.id !== postId));
+    setAllPosts(prev => prev.filter(post => post.id !== postId));
     toast.success("Post deleted successfully");
   };
 
@@ -53,7 +54,8 @@ export const usePosts = () => {
   };
 
   return {
-    posts,
+    initialPosts,
+    allPosts,
     editingPost,
     isDialogOpen,
     createPost,

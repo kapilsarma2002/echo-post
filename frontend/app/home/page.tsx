@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs' 
 
 // Import components
 import PostItem from "@/components/post/PostItem";
@@ -32,6 +33,9 @@ import { ProfileDropdown } from "@/components/layout/ProfileDropdown";
 
 const Home = () => {
 
+  const { user } = useUser()
+  if (!user) return null
+
   const router = useRouter()
 
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -40,7 +44,7 @@ const Home = () => {
   
   // Use the posts hook
   const {
-    posts,
+    allPosts,
     editingPost,
     isDialogOpen,
     deletePost,
@@ -157,7 +161,7 @@ const Home = () => {
         {/* Welcome and Quick Actions */}
         <div className="flex flex-col md:flex-row justify-between items-start mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Hello, Jessica 👋</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Hello, {user.firstName ?? ''} 👋</h1>
             <p className="text-gray-600 mt-1">Here's what's happening with your posts today.</p>
           </div>
           <div className="mt-4 md:mt-0 flex space-x-3">
@@ -184,7 +188,7 @@ const Home = () => {
               </div>
               
               <div className="space-y-4">
-                {posts.map(post => (
+                {allPosts.map(post => (
                   <PostItem 
                     key={post.id} 
                     post={post} 
@@ -201,7 +205,7 @@ const Home = () => {
             
             {/* Content Calendar */}
             <ContentCalendar 
-              posts={posts}
+              posts={allPosts}
               calendarView={calendarView}
               onChangeView={handleCalendarView}
               onDateClick={handleCalendarDateClick}

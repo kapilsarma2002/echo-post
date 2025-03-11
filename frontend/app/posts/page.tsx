@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 const PostsList = () => {
   const router = useRouter();
   const {
-    posts,
+    allPosts,
     editingPost,
     isDialogOpen,
     deletePost,
@@ -43,8 +43,8 @@ const PostsList = () => {
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="space-y-4">
-            {posts.length > 0 ? (
-              posts.map(post => (
+            {allPosts.length > 0 ? (
+              allPosts.map(post => (
                 <PostItem 
                   key={post.id} 
                   post={post} 

@@ -19,7 +19,7 @@ const createNewUser = async () => {
     })
   }
 
-  redirect('/trip');
+  redirect('/home');
 }
 
 const NewUser = async () => {

@@ -1,7 +1,13 @@
+'use client'
+
 import { Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 export const NavBar = () => {
+
+  const router = useRouter()
+
     return (
         <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
         <div className="flex items-center space-x-2">
@@ -14,8 +20,8 @@ export const NavBar = () => {
           <a href="#testimonials" className="text-gray-600 hover:text-gray-900 transition-colors">Testimonials</a>
         </div>
         <div className="flex items-center space-x-3">
-          <Button variant="ghost" className="hidden sm:inline-flex">Log in</Button>
-          <Button>Sign up free</Button>
+          <Button variant="ghost" className="hidden sm:inline-flex" onClick={() => router.push('/sign-in')}>Log in</Button>
+          <Button onClick={() => router.push('/sign-up')}>Sign up free</Button>
         </div>
       </nav>
     )

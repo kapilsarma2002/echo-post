@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from 'lucide-react';
 import { NavBar } from '@/components/NavBar';
@@ -7,8 +9,12 @@ import { Features } from '@/components/Features';
 import { Pricing } from '@/components/Pricing';
 import { Testimonials } from '@/components/Testimonials';
 import { Footer } from '@/components/Footer';
+import { useRouter } from "next/navigation";
 
 const Index = () => {
+
+  const router = useRouter()
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Navigation */}
@@ -36,7 +42,7 @@ const Index = () => {
           <p className="text-indigo-100 max-w-2xl mx-auto mb-8">
             Join thousands of content creators, influencers, and brands who use Echopost to grow their social media presence.
           </p>
-          <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100">
+          <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100" onClick={() => router.push('/sign-up')}>
             Get started for free
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
