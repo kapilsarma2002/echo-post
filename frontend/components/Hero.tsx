@@ -1,12 +1,26 @@
 import { ChevronRight, Clock, Facebook, Instagram, Twitter } from "lucide-react"
 import { Button } from "./ui/button"
+import { motion } from "framer-motion"
 
 export const Hero = () => {
     return (
         <section className="container mx-auto px-4 py-20 md:py-32 flex flex-col items-center text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight max-w-4xl mb-6">
-                Schedule your social media posts with <span className="text-indigo-600">confidence</span>
-            </h1>
+             <motion.h1 
+                className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight max-w-4xl mb-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.2 }}
+            >
+                Schedule your social media posts with{" "}
+                <motion.span 
+                    className="text-indigo-600"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                >
+                    confidence
+                </motion.span>
+            </motion.h1>
             <p className="text-xl text-gray-600 max-w-2xl mb-10">
                 Plan, schedule, and automate your social media content across all major platforms in one simple dashboard.
             </p>

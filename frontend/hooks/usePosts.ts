@@ -1,33 +1,83 @@
-
-import { useState } from 'react';
-import { Post, initialPosts, posts } from '@/types/post';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { Post, fetchPosts } from "@/types/post";
+import { toast } from "sonner";
 
 export const usePosts = () => {
-  const [homePosts, setHomePosts] = useState<Post[]>(initialPosts);
-  const [allPosts, setAllPosts] = useState<Post[]>(posts);
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const createPost = (newPost: Post) => {
-    setAllPosts(prev => [
-      {
-        ...newPost,
-        id: prev.length > 0 ? Math.max(...prev.map(p => p.id)) + 1 : 1
-      },
-      ...prev
-    ]);
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const loadPosts = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const posts = await fetchPosts();
+      setAllPosts(posts);
+    } catch {
+      const errorMessage = "Failed to load posts";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const updatePost = (updatedPost: Post) => {
-    setAllPosts(prev => prev.map(post => 
-      post.id === updatedPost.id ? updatedPost : post
-    ));
+  const createPost = async (newPost: Post) => {
+    try {
+      const response = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPost),
+      });
+
+      if (!response.ok) throw new Error("Failed to create post");
+
+      const createdPost = await response.json();
+      setAllPosts((prev) => [createdPost, ...prev]);
+      toast.success("Post created successfully");
+    } catch (_: unknown) {
+      toast.error("Failed to create post");
+    }
   };
 
-  const deletePost = (postId: number) => {
-    setAllPosts(prev => prev.filter(post => post.id !== postId));
-    toast.success("Post deleted successfully");
+  const updatePost = async (updatedPost: Post) => {
+    try {
+      const response = await fetch(`/api/posts/${updatedPost.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedPost),
+      });
+
+      if (!response.ok) throw new Error("Failed to update post");
+
+      setAllPosts((prev) =>
+        prev.map((post) => (post.id === updatedPost.id ? updatedPost : post))
+      );
+      toast.success("Post updated successfully");
+    } catch (_: unknown) {
+      toast.error("Failed to update post");
+    }
+  };
+
+  const deletePost = async (postId: number) => {
+    try {
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete post");
+
+      setAllPosts((prev) => prev.filter((post) => post.id !== postId));
+      toast.success("Post deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete post");
+    }
   };
 
   const handleOpenCreateDialog = () => {
@@ -45,25 +95,26 @@ export const usePosts = () => {
     setEditingPost(null);
   };
 
-  const handleSavePost = (post: Post) => {
+  const handleSavePost = async (post: Post) => {
     if (editingPost) {
-      updatePost(post);
+      await updatePost(post);
     } else {
-      createPost(post);
+      await createPost(post);
     }
+    handleCloseDialog();
   };
 
   return {
-    initialPosts,
     allPosts,
     editingPost,
     isDialogOpen,
+    isLoading,
     createPost,
     updatePost,
     deletePost,
     handleOpenCreateDialog,
     handleOpenEditDialog,
     handleCloseDialog,
-    handleSavePost
+    handleSavePost,
   };
 };
